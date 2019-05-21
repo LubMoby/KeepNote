@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Заметки</string>
+    <string name="action_share">Поделиться</string>
+    <string name="hint_note">Введите текст заметки</string>
+    <string name="button_save_note">Сохранить заметку</string>
+    <string name="helper_text">Заметка</string>
+    <string name="detai_name">Заметка</string>
+</resources>
