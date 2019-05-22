@@ -2,9 +2,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.keepnote.MainActivity">
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_sort"
         android:orderInCategory="100"
-        android:title="@string/action_share"
-        app:showAsAction="never" />
+        app:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="@string/action_delete">
+        <menu>
+            <item android:id="@+id/action_sortUp"
+                android:title="@string/action_share"/>
+            <item android:id="@+id/action_sortDown"
+                android:title="@string/action_sort_down"/>
+        </menu>
+    </item>
 </menu>
