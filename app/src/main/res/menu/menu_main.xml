@@ -8,10 +8,10 @@
         android:orderInCategory="100"
         app:showAsAction="always"
         android:icon="@android:drawable/ic_menu_sort_by_size"
-        android:title="@string/action_delete">
+        android:title="@string/action_sort">
         <menu>
             <item android:id="@+id/action_sortUp"
-                android:title="@string/action_share"/>
+                android:title="@string/action_sort_Up"/>
             <item android:id="@+id/action_sortDown"
                 android:title="@string/action_sort_down"/>
         </menu>

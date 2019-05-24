@@ -1,16 +1,17 @@
 <resources>
     <string name="app_name">Заметки</string>
-    <string name="action_share">Поделится</string>
-    <string name="action_sort_down">От старых к новым</string>
+    <string name="detail_name">Заметка</string>
+
     <string name="hint_note">Введите текст заметки</string>
-    <string name="button_save_note">Сохранить заметку</string>
     <string name="helper_text">Кнопка назад добавит заметку</string>
-    <string name="detai_name">Заметка</string>
-    <string name="title_activity_2">Activity2</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
-    <string name="action_delete">Удалить</string>
+
+    <string name="action_sort_Up">От новых к старым</string>
+    <string name="action_sort_down">От старых к новым</string>
+    <string name="action_sort">Сортировать</string>
     <string name="clear">Очистить</string>
     <string name="search">Найти</string>
+
+    <string name="action_share">Поделится</string>
+    <string name="action_delete">Удалить</string>
+
 </resources>

@@ -1,5 +1,8 @@
 package com.example.keepnote;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,27 +14,32 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.example.keepnote.db.NoteEntity;
+import com.example.keepnote.viewmodel.NotesViewModel;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private ArrayList<String> listNotes;
+    private List<NoteEntity> listNotes;
     private RecyclerView notesRecycler;
     private NotesAdapter notesAdapter;
     private EditText txtSearch;
     private ImageView imgSearch;
     private ImageView imgClear;
 
+    private NotesViewModel notesViewModel;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +48,19 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        loadNotes();
+        notesViewModel = ViewModelProviders.of(this).get(NotesViewModel.class);
+
         initRecyclerView();
         searchAction();
+        UpdateList();
 
         notesAdapter.setListener(new NotesAdapter.Listener() {
             @Override
-            public void onClick(int position) {
+            public void onClick(int id) {
+                NoteEntity noteEntity = notesViewModel.getNoteById(id);
                 Intent intent = new Intent(MainActivity.this,NoteDetailsActivity.class);
-                intent.putExtra(NoteDetailsActivity.TEXT_NOTE, notesAdapter.getCurrentText(position));
-                intent.putExtra(NoteDetailsActivity.ID_NOTE, position);
+                intent.putExtra(NoteDetailsActivity.TEXT_NOTE, noteEntity.noteText);
+                intent.putExtra(NoteDetailsActivity.ID_NOTE, id);
                 startActivityForResult(intent, NoteDetailsActivity.EDIT_NOTE);
             }
         });
@@ -67,51 +78,53 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        int idNote = data.getIntExtra(NoteDetailsActivity.ID_NOTE, -1);
+        int  idNote = data.getIntExtra(NoteDetailsActivity.ID_NOTE, -1);
         String textNote = data.getStringExtra(NoteDetailsActivity.TEXT_NOTE);
 
         if(resultCode == RESULT_OK) {
             if (requestCode == NoteDetailsActivity.EDIT_NOTE) {
-                 if (idNote != -1) {
-                    notesAdapter.editItem(idNote, textNote);
+                 if (idNote > 0) {
+                     NoteEntity noteEntity = notesViewModel.getNoteById(idNote);
+                     noteEntity.noteText = textNote;
+                     notesViewModel.update(noteEntity);
                 } else {
                     Toast.makeText(this, "Ошибка изменения заметки!", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == NoteDetailsActivity.ADD_NOTE) {
-                notesAdapter.addItem(textNote);
+                NoteEntity noteEntity = new NoteEntity(textNote);
+                notesViewModel.insert(noteEntity);
             }
         }else if(resultCode == NoteDetailsActivity.RESULT_DELETE){
-            notesAdapter.deleteItem(idNote);
+            if (idNote > 0) {
+                NoteEntity noteEntity = notesViewModel.getNoteById(idNote);
+                notesViewModel.deleteNote(noteEntity);
+            }
+
         }else {
             Toast.makeText(this, "Отмена Добавления/Редактирования заметки", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void loadNotes() {
-        listNotes = new ArrayList<>();
-
-        listNotes.add("Заметка 1");
-        listNotes.add("Заметка 2");
-        listNotes.add("Заметка 3");
-        listNotes.add("Заметка 4");
-        listNotes.add("Заметка 5");
-        listNotes.add("Заметка 6");
-    }
-
     private void initRecyclerView(){
         notesRecycler = findViewById(R.id.recycler_view_notes);
         notesRecycler.setLayoutManager(new LinearLayoutManager(this));
-        notesAdapter = new NotesAdapter(listNotes);
+        notesAdapter = new NotesAdapter(this);
         notesRecycler.setAdapter(notesAdapter);
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+     }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-       return super.onCreateOptionsMenu(menu);
+         return true;
     }
 
     @Override
@@ -182,15 +195,34 @@ public class MainActivity extends AppCompatActivity {
         inputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
-    private void openKeyboard() {
-        InputMethodManager imm = (InputMethodManager) this.getSystemService(this.INPUT_METHOD_SERVICE);
-        if(imm != null){
-            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+    private void UpdateList() {
+
+        txtSearch = (EditText) findViewById(R.id.txtSearch);
+        String filerText = txtSearch.getText().toString();
+
+        if (!filerText.isEmpty()) {
+            notesViewModel.getNoteListFilter("%" + filerText + "%").observe(this, new Observer<List<NoteEntity>>() {
+                @Override
+                public void onChanged(@Nullable List<NoteEntity> noteEntities) {
+                    notesAdapter.setItems(noteEntities);
+                }
+            });
+
+        } else {
+            notesViewModel.getNoteList().observe(this, new Observer<List<NoteEntity>>() {
+                @Override
+                public void onChanged(@Nullable List<NoteEntity> noteEntities) {
+                    notesAdapter.setItems(noteEntities);
+                }
+            });
         }
     }
 
-    private void UpdateList() {
-        //Выполняем запрос для обновления списка
+    public void removeData() {
+        if (notesViewModel != null) {
+            notesViewModel.deleteAll();
+        }
     }
-
 }
+
+

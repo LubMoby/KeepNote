@@ -9,7 +9,6 @@ import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -98,27 +97,29 @@ public class NoteDetailsActivity extends AppCompatActivity {
 
     private void deleteItem(){
         Intent answerIntent = new Intent(NoteDetailsActivity.this, MainActivity.class);
-        if(idNote >= 0) {
-            answerIntent.putExtra(ID_NOTE, idNote);
-            setResult(RESULT_DELETE, answerIntent);
-        }
-            finish();
+        answerIntent.putExtra(ID_NOTE, idNote);
+        setResult(RESULT_DELETE, answerIntent);
+
+        finish();
     }
+
     private void saveNote(){
         String textNote = inputEditText.getText().toString();
+        Intent answerIntent = new Intent(NoteDetailsActivity.this, MainActivity.class);
+        answerIntent.putExtra(TEXT_NOTE, inputEditText.getText().toString());
+
         if(!textNote.isEmpty()){
-            Intent answerIntent = new Intent(NoteDetailsActivity.this, MainActivity.class);
-            answerIntent.putExtra(TEXT_NOTE, inputEditText.getText().toString());
-            if(idNote >= 0){
+            if(idNote > 0){
                 answerIntent.putExtra(ID_NOTE, idNote);
                 setResult(RESULT_OK, answerIntent);
             }else {
                 setResult(RESULT_OK, answerIntent);
             }
-            finish();
+
         }else {
+            setResult(RESULT_CANCELED, answerIntent);
             Toast.makeText(this, "Заметка не может быть пустой! Введите текст заметки!", Toast.LENGTH_SHORT).show();
         }
-
+        finish();
     }
 }
